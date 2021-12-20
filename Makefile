@@ -6,13 +6,14 @@
 #    By: pnielly <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/10 20:59:10 by pnielly           #+#    #+#              #
-#    Updated: 2021/12/20 02:05:38 by user42           ###   ########.fr        #
+#    Updated: 2021/12/20 11:12:53 by user42           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 #----- Executables
 SERVER=server
 CLIENT=client
+TOTO=toto
 
 #----- Commands
 CC=clang++
@@ -21,6 +22,7 @@ FLAGS=-Wall -Wextra -Werror -std=c++98
 #----- SRCS
 SERVER_SRC=server.cpp
 CLIENT_SRC=client.cpp
+TOTO_SRC=toto.cpp
 
 #----- INC
 INC=$(wildcard *.hpp)
@@ -38,13 +40,16 @@ WHITE:="\033[1;37m"
 EOC:="\033[0;0m"
 
 # ---------- Rules
-all: $(SERVER) $(CLIENT)
+all: $(SERVER) $(CLIENT) $(TOTO)
 
 $(SERVER):
 	$(CC) $(FLAGS) -I $(INC) $(SERVER_SRC) -o $(SERVER)
 
 $(CLIENT):
 	$(CC) $(FLAGS) -I $(INC) $(CLIENT_SRC) -o $(CLIENT)
+
+$(TOTO):
+	$(CC) $(FLAGS) -I $(INC) $(TOTO_SRC) -o $(TOTO)
 
 clean:
 	@rm -rf $(OBJS) 
