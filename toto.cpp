@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 10:13:08 by user42            #+#    #+#             */
-/*   Updated: 2021/12/20 11:14:38 by user42           ###   ########.fr       */
+/*   Updated: 2021/12/20 12:51:17 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ int	main(int ac, char **av)
 
 	if (ac != 2)
 		exit(EXIT_FAILURE);
+
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("socket error");
@@ -49,7 +50,8 @@ int	main(int ac, char **av)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(PORT);
 
-	if (inet_pton(AF_INET,av[1], &servaddr.sin_addr) <= 0)
+//	if (inet_pton(AF_INET,av[1], &servaddr.sin_addr) <= 0)
+	if (inet_addr(av[1]) <= 0)
 	{
 		printf("inet_pton failed");
 		exit(EXIT_FAILURE);
@@ -64,14 +66,14 @@ int	main(int ac, char **av)
 	sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");
 	sendbytes = strlen(sendline);
 
-	if (write(sock, sendline, sendbytes) != sendbytes)
+	if (send(sock, sendline, sendbytes, 0) != sendbytes)
 	{
 		printf("write failed");
 		exit(EXIT_FAILURE);
 	}
 
 	memset(recvline, 0, MAXLINE);
-	while ((n = read(sock,recvline, MAXLINE - 1)) > 0)
+	while ((n = recv(sock, recvline, MAXLINE - 1, 0)) > 0)
 	{
 		printf("%s", recvline);
 	}

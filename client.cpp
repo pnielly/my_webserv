@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 01:52:16 by user42            #+#    #+#             */
-/*   Updated: 2021/12/20 02:09:35 by user42           ###   ########.fr       */
+/*   Updated: 2021/12/20 13:57:24 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ int main(int ac, char const *av[])
 	send(sock , "hello from client" , strlen("hello from client") , 0 );
 	printf("Hello message sent\n");
 	// once connected: receive string from server
-	valread = recv( sock , buffer, 1024, MSG_DONTWAIT);
+	valread = recv( sock , buffer, 1024, 0);
 	printf("%s\n",buffer );
 	return 0;
 }

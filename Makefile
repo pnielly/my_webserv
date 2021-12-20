@@ -6,7 +6,7 @@
 #    By: pnielly <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/10 20:59:10 by pnielly           #+#    #+#              #
-#    Updated: 2021/12/20 11:12:53 by user42           ###   ########.fr        #
+#    Updated: 2021/12/20 13:25:58 by pnielly          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ TOTO=toto
 
 #----- Commands
 CC=clang++
-FLAGS=-Wall -Wextra -Werror -std=c++98
+FLAGS= #-Wall -Wextra -Werror -std=c++98
 
 #----- SRCS
 SERVER_SRC=server.cpp
@@ -55,7 +55,7 @@ clean:
 	@rm -rf $(OBJS) 
 
 fclean: clean
-	@rm -rf ${CLIENT} ${SERVER}
+	@rm -rf ${CLIENT} ${SERVER} ${TOTO}
 	
 re: fclean all
 

@@ -6,7 +6,7 @@
 /*   By: user42 <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 01:46:41 by user42            #+#    #+#             */
-/*   Updated: 2021/12/20 02:09:11 by user42           ###   ########.fr       */
+/*   Updated: 2021/12/20 17:12:58 by pnielly          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,33 +14,35 @@
 
 #define PORT 8080
 
-int main(int ac, char const *av[])
+int setup_socket(int *server_fd, int *on, struct sockaddr_in address)
 {
-	(void)ac; (void)av;
-	int server_fd, new_socket; long valread;
-	struct sockaddr_in address;
-	int addrlen = sizeof(address);
-
-
 	// create socket
-	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+	if ((*server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
 	{
 		perror("In socket");
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 
-	// set sockaddr_in
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons( PORT );
-	memset(address.sin_zero, '\0', sizeof address.sin_zero);
-
+	//allow socket descriptor to be reuseable
+	if (setsockopt(*server_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) < 0)
+	{
+		perror("In setsockopt");
+		return -1;
+	}
 	// name the socket (assign transport address)
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
+	if (bind(*server_fd, (struct sockaddr *)&address, sizeof(address))<0)
 	{
 		perror("In bind");
-		exit(EXIT_FAILURE);
+		return -1;
 	}
+	return 0;
+
+}
+
+int	ft_listen(int server_fd, struct sockaddr_in address)
+{
+	int new_socket;
+	int addrlen = sizeof(address);
 
 	// wait for incoming connection
 	if (listen(server_fd, 10) < 0)
@@ -48,7 +50,13 @@ int main(int ac, char const *av[])
 		perror("In listen");
 		exit(EXIT_FAILURE);
 	}
+	
+	fd_set	master_set, working_set;
 
+	FD_ZERO(&master_set);
+	int max_sd = server_fd;
+	FD_SET(server_fd, &master_set);
+	
 	while(1)
 	{
 		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
@@ -62,15 +70,39 @@ int main(int ac, char const *av[])
 
 		// read from new_socket
 		char buffer[30000] = {0};
+		long valread;
 		valread = recv( new_socket , buffer, 30000, 0);
 		printf("%s\n",buffer );
 
 		// write into new_socket
-		write(new_socket , "hello from server" , strlen("hello from server"));
+		char * message = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+		write(new_socket , message , strlen(message));
 		printf("------------------Hello message sent-------------------\n");
 
 		close(new_socket);
 	}
+}
+
+int main(int ac, char const *av[])
+{
+	(void)ac; (void)av;
+	int server_fd = 0, on = 0;
+	struct sockaddr_in address;
+
+	// set sockaddr_in
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons( PORT );
+	memset(address.sin_zero, '\0', sizeof address.sin_zero);
+
+	// create and name socket
+	if (setup_socket(&server_fd, &on, address) < 0)
+		exit(EXIT_FAILURE);
+
+	//listen
+	if (ft_listen(server_fd, address) < 0)
+		exit(EXIT_FAILURE);
+
 	return 0;
 }
 
