@@ -1,0 +1,14 @@
+Github basics :
+https://tutorialzine.com/2016/06/learn-git-in-30-minutes
+
+Les grandes parties du projet :
+A. Connection (gérer toutes les erreurs / gérer poll, select?)
+B. Le parsing (des fichiers de configuration)
+C. Execution (request/response, headers)
+
+Use select system call : https://www.youtube.com/watch?v=Y6pFtgRdUts
+https://www.lowtek.com/sockets/select.html
+
+
+
+Headers tutorial : https://code.tutsplus.com/tutorials/http-headers-for-dummies--net-8039
