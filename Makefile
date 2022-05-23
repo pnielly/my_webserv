@@ -3,60 +3,81 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: pnielly <marvin@42.fr>                     +#+  +:+       +#+         #
+#    By: fhamel <fhamel@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2021/12/10 20:59:10 by pnielly           #+#    #+#              #
-#    Updated: 2021/12/20 13:25:58 by pnielly          ###   ########.fr        #
+#    Created: 2022/01/28 18:43:03 by fhamel            #+#    #+#              #
+#    Updated: 2022/02/22 02:19:59 by fhamel           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-#----- Executables
-SERVER=server
-CLIENT=client
-TOTO=toto
+################################################################################
+#####                              FILES VARS                              #####
+################################################################################
 
-#----- Commands
-CC=clang++
-FLAGS= #-Wall -Wextra -Werror -std=c++98
+NAME		=	webserv
 
-#----- SRCS
-SERVER_SRC=server.cpp
-CLIENT_SRC=client.cpp
-TOTO_SRC=toto.cpp
+D_OBJS		=	objs/
 
-#----- INC
-INC=$(wildcard *.hpp)
+D_SRCS		=	srcs/
 
-#----- OBJS
-OBJS=$(SRCS:.c=.o)
+_SRC_		=	main.cpp \
+				autoIndex.cpp \
+				cgiHandler.cpp \
+				Location.cpp \
+				Parser.cpp \
+				CheckerParser.cpp \
+				RequestParser.cpp \
+				Response.cpp \
+				ResponseHeader.cpp \
+				Server.cpp \
+				SockData.cpp \
+				SockClient.cpp \
+				socket.cpp \
+				utils.cpp \
 
-#Colors
-BLACK:="\033[1;30m"
-RED:="\033[1;31m"
-GREEN:="\033[1;32m"
-PURPLE:="\033[1;35m"
-CYAN:="\033[1;36m"
-WHITE:="\033[1;37m"
-EOC:="\033[0;0m"
+SRCS		=	$(addprefix $(D_SRCS), $(_SRC_))
 
-# ---------- Rules
-all: $(SERVER) $(CLIENT) $(TOTO)
+OBJS		=	$(addprefix $(D_OBJS), $(_SRC_:.cpp=.o))
 
-$(SERVER):
-	$(CC) $(FLAGS) -I $(INC) $(SERVER_SRC) -o $(SERVER)
+R			=	\033[0;31m
+G			=	\033[0;32m
+B			=	\033[0;34m
+W			=	\033[0m
 
-$(CLIENT):
-	$(CC) $(FLAGS) -I $(INC) $(CLIENT_SRC) -o $(CLIENT)
+################################################################################
+#####                           COMPILER OPTIONS                           #####
+################################################################################
 
-$(TOTO):
-	$(CC) $(FLAGS) -I $(INC) $(TOTO_SRC) -o $(TOTO)
+CC			=	clang++ -std=c++98
 
-clean:
-	@rm -rf $(OBJS) 
+FLAGS		=	-Wall -Wextra -Werror
 
-fclean: clean
-	@rm -rf ${CLIENT} ${SERVER} ${TOTO}
-	
-re: fclean all
+FSANITIZE	=	-g -fsanitize=address
 
-.PHONY: all clean fclean re
+################################################################################
+#####                            MAKEFILE RULES                            #####
+################################################################################
+
+all	: $(D_OBJS) $(NAME)
+
+$(D_OBJS) :
+	@mkdir objs
+
+$(D_OBJS)%.o : $(D_SRCS)%.cpp Makefile
+	@$(CC) $(FLAGS) -c $< -o $@ -Iincludes
+	@printf "$(B)$<$(W) linking...\n"
+
+$(NAME) : $(OBJS) Makefile
+	@printf "Compiling objects...\n"
+	@$(CC) $(OBJS) -o $(NAME)
+	@printf "[ $(G)$(NAME)$(W) ] Compiled\n"
+
+clean :
+	@rm -rf $(D_OBJS)
+	@printf "[ Object files ] $(R)removed\n$(W)"
+
+fclean : clean
+	@rm -rf $(NAME)
+	@printf "[ $(NAME) ] $(R)removed\n$(W)"
+
+re : fclean all

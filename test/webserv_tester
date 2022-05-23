@@ -1,0 +1,233 @@
+#!/usr/local/bin/python3
+
+import socket
+import time
+import threading
+import sys
+
+########################################
+#               VARIABLES              #
+########################################
+
+if len(sys.argv) != 3:
+	sys.exit('Error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect')
+
+hostname = 'localhost'
+port = int(sys.argv[1])
+test = str(sys.argv[2])
+
+lock = threading.Lock()
+
+########################################
+#               FUNCTIONS              #
+########################################
+
+def is_server_up(hostname, port):
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.settimeout(3)
+	sock.connect((hostname, port))
+	sock.send(b'Check if server is up')
+	try:
+		sock.recv(4096)
+		return True
+	except:
+		return False
+
+def get_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'GET / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	ret = sock.recv(4096)
+	print(ret)
+
+def post_text_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'POST / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Content-Type: text/plain\r\n\
+Content-Length: 12\r\n\
+Connection: keep-alive\r\n\
+\r\n\
+Hello World!\r\n\
+\r\n')
+	ret = sock.recv(4096)
+	print(ret)
+
+def delete_tester():
+	pathDelete = input('Enter path to file you want to delete: ')
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'DELETE ' + bytes(pathDelete, 'utf-8') + b' HTTP/1.1\r\n\r\n')
+	ret = sock.recv(4096)
+	print(ret)
+
+def stress1_tester():
+	socks = []
+	for i in range(1500):
+		time.sleep(0.005)
+		socks.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+		socks[i].connect((hostname, port))
+		socks[i].settimeout(3)
+		socks[i].send(b'GET / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Accept-Encoding: *\r\n\
+Accept: */*\r\n\
+Connection: keep-alive\r\n\r\n')
+		try:
+			socks[i].recv(4096)
+			strg = 'socket ' + str(i) + ': data received from server'
+			lock.acquire()
+			print("                                                  ", end='\r')
+			print(strg, end='\r')
+			lock.release()
+		except:
+			strg = 'socket ' + str(i) + ': cannot receive data from server'
+			print("                                                  ", end='\r')
+			print(strg, end='\r')
+
+def stress2_tester():
+	thread1 = threading.Thread(target=stress1_tester)
+	thread2 = threading.Thread(target=stress1_tester)
+	print('Thread 1 starting...')
+	thread1.start()
+	time.sleep(3)
+	lock.acquire()
+	print('                                                  ', end='\r')
+	print('Thread 2 starting...')
+	lock.release()
+	thread2.start()
+	thread1.join()
+	thread2.join()
+
+def chunk_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.send(b'POST / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Content-Type: application/x-www-form-urlencoded\r\n\
+Accept-Encoding: *\r\n\
+Accept: */*\r\n\
+Connection: keep-alive\r\n\
+Transfer-Encoding: chunked\r\n\r\n\
+9\r\n\
+name=Foo&\r\n\r\n')
+	time.sleep(0.01)
+	sock.send(b'B\r\n\
+message=Bar\r\n\r\n')
+	time.sleep(0.01)
+	sock.send(b'0\r\n\r\n')
+	ret = sock.recv(4096)
+	print(ret)
+
+def large_payload_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.send(b'POST / HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Accept-Encoding: *\r\n\
+Accept: */*\r\n\
+Connection: keep-alive\r\n\
+Transfer-Encoding: chunked\r\n\r\n\
+4\r\n\
+yoyo\r\n\r\n')
+	time.sleep(0.005)
+	for i in range(3965 * 3):
+		time.sleep(0.005)
+		sock.send(b'3E8\r\n\
+Phasellus consequat placerat tristique. Fusce vel eleifend tortor. Aenean egestas non risus et vehicula. Nam ac mauris odio. Maecenas convallis mi vel justo vehicula, a interdum leo porta. Mauris consequat nec urna sed aliquet. Aliquam aliquet, dui id hendrerit auctor, turpis ante facilisis sapien, sit amet interdum nibh ipsum et ex. Etiam vulputate in libero quis viverra. Nunc sit amet ipsum id ipsum scelerisque efficitur. Vivamus in sapien id tortor dapibus accumsan. Cras eleifend, est et vestibulum efficitur, lorem velit pulvinar mi, nec vehicula ligula nisl quis tortor. In sagittis sapien sit amet enim rutrum varius. Maecenas cursus justo a sapien blandit, sit amet tincidunt sem lacinia. Suspendisse bibendum tristique orci, et ornare massa mollis sit amet. Aenean dictum, turpis vitae varius auctor, arcu mi malesuada libero, et ullamcorper dolor justo in turpis. Pellentesque vestibulum porttitor porta. Phasellus consequat placerat tristique. Phasellus consequat placerat tristique...\r\n\r\n')
+	time.sleep(0.005)
+	sock.send(b'0\r\n\r\n')
+	ret = sock.recv(4096)
+	print(ret)
+
+def redirect_tester():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((hostname, port))
+	sock.settimeout(3)
+	sock.send(b'GET /redirect/ HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	ret = sock.recv(4096)
+	print('GET /redirect/ HTTP/1.1')
+	print()
+	print(ret)
+	print()
+	sock.send(b'GET /redirect/dir2 HTTP/1.1\r\n\
+Host: ' + bytes(hostname, 'utf-8') + b':' + bytes(str(port), 'utf-8') + b'\r\n\
+User-Agent: webserv_tester\r\n\
+Connection: keep-alive\r\n\r\n')
+	ret = sock.recv(4096)
+	print('GET /redirect/dir2 HTTP/1.1')
+	print()
+	print(ret)
+	print()
+
+########################################
+#               EXEC_FCTS              #
+########################################
+
+names = ['get',
+'post_text',
+'delete',
+'stress1',
+'stress2',
+'chunk',
+'large_payload',
+'redirect']
+
+tester = dict()
+tester[names[0]] = get_tester
+tester[names[1]] = post_text_tester
+tester[names[2]] = delete_tester
+tester[names[3]] = stress1_tester
+tester[names[4]] = stress2_tester
+tester[names[5]] = chunk_tester
+tester[names[6]] = large_payload_tester
+tester[names[7]] = redirect_tester
+
+def exec_tester(name):
+	print('\033[1;34m\n--------------------------------')
+	print('    ' + name.upper() + ' starting...')
+	print('--------------------------------\033[0m')
+	time.sleep(0.5)
+	tester[name]()
+	print('\n' + name.upper(), end='\r')
+	ret = is_server_up(hostname, port)
+	time.sleep(0.5)
+	if ret:
+		print('SERVER' + ' [ \033[1;32mUP\033[0m ]')
+	else:
+		print('SERVER' + ' [ \033[1;31mDOWN\033[0m ]')
+
+########################################
+#                  RUN                 #
+########################################
+
+if __name__ == '__main__':
+	print('[ hostname: ' + '\033[1;32m' + hostname + '\033[0m ]')
+	print('[ port: ' + '\033[1;32m' + str(port) + '\033[0m ]')
+	test_ = '[ test: ' + '\033[1;32m' + test + '\033[0m ]'
+	print(test_)
+
+	time.sleep(1)
+
+	if (test != 'all'):
+		try:
+			exec_tester(test)
+		except:
+			print('\033[1;31mError: exec_tester\033[0m')
+	else:
+		for name in names:
+			exec_tester(name)
