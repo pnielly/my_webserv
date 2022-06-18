@@ -1,5 +1,5 @@
 # webserv
-Create a HTTP server in C++98. 
+Create a HTTP server in C++98.
 
 ## Installation
 
