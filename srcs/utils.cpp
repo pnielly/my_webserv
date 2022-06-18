@@ -263,25 +263,14 @@ long long maxBodyAtoi(std::string maxBodySize) {
 
 	pos = maxBodySize.length() - 1; //last element of maxSizeBody
 
-	if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k')
-		ret *= K;
-	else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm')
-		ret *= M;
-	else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g')
-		ret *= G;
-	else if (!isdigit(maxBodySize.at(pos)))
-		throw WrongFormatMaxBodySizeException();
-
-	if (pos && !isdigit(maxBodySize.at(pos - 1)))
-		throw WrongFormatMaxBodySizeException();
-
-	if (maxBodySize.find_first_of("0123456789") != 0)
-		throw WrongFormatMaxBodySizeException();
-	
-	if (!ret)
-		throw WrongFormatMaxBodySizeException();
-
-		return ret;
+	if (maxBodySize.at(pos) == 'K' || maxBodySize.at(pos) == 'k') ret *= K;
+	else if (maxBodySize.at(pos) == 'M' || maxBodySize.at(pos) == 'm') ret *= M;
+	else if (maxBodySize.at(pos) == 'G' || maxBodySize.at(pos) == 'g') ret *= G;
+	else if (!isdigit(maxBodySize.at(pos))) throw WrongFormatMaxBodySizeException();
+	if (pos && !isdigit(maxBodySize.at(pos - 1))) throw WrongFormatMaxBodySizeException();
+	if (maxBodySize.find_first_of("0123456789") != 0) throw WrongFormatMaxBodySizeException();
+	if (!ret) throw WrongFormatMaxBodySizeException();
+	return ret;
 }
 
 /**

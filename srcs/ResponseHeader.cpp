@@ -79,17 +79,12 @@ void               ResponseHeader::setCgiHeader(std::string cgiHeader)
 
 void            ResponseHeader::writeHeader()
 {
-    if (_header.empty() == false)
-        return ;
+    if (_header.empty() == false) return ;
     _header = "HTTP/1.1 " + _status + "\r\n";
-    if (_contentType.empty() == false)
-        _header += "Content-Type: " + _contentType + "\r\n";
-    if (_bodyLength >= 0)
-        _header += "Content-Length: " + sizeToString(_bodyLength) + "\r\n";
-    if (_location.empty() == false)
-        _header += "Location: " + _location + "\r\n";
-	if (_date.empty() == false)
-		_header += "Date: " + _date + "\r\n";
+    if (_contentType.empty() == false) _header += "Content-Type: " + _contentType + "\r\n";
+    if (_bodyLength >= 0) _header += "Content-Length: " + sizeToString(_bodyLength) + "\r\n";
+    if (_location.empty() == false) _header += "Location: " + _location + "\r\n";
+	if (_date.empty() == false) _header += "Date: " + _date + "\r\n";
     _header += "\r\n";
 }
 

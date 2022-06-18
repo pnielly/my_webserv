@@ -145,7 +145,10 @@ void	Response::answer()
 
 void	Response::sendPage(int code)
 {
-	std::string foundCode = std::to_string(code);
+	std::string foundCode;
+	std::stringstream out;
+	out << code;
+	foundCode = out.str();
 	if (!readErrorPage(_errorPage[foundCode]))
 	{
 		if (code == 308 || code == 310)
@@ -312,9 +315,7 @@ void				Response::isUpload(std::string &answer)
 		return ;
 	std::string contentType = _request.getContentType();
 	size_t foundFileName = _request.getBody().find("filename=");
-    if (foundFileName == std::string::npos || 
-		contentType.find("multipart/form-data") == std::string::npos) 
-        return ;
+    if (foundFileName == std::string::npos || contentType.find("multipart/form-data") == std::string::npos) return ;
 	std::string fileName = _request.getBody().substr(foundFileName, _request.getBody().find("\n", foundFileName));
     fileName = fileName.substr(0, fileName.find("\n"));
     fileName = fileName.substr(10);

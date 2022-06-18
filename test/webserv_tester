@@ -10,7 +10,7 @@ import sys
 ########################################
 
 if len(sys.argv) != 3:
-	sys.exit('Error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect')
+	sys.exit('Error: usage: ./webserv port [all, up, get, post_text, delete, stress1, stress2, chunk, large_payload, redirect]')
 
 hostname = 'localhost'
 port = int(sys.argv[1])
