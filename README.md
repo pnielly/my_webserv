@@ -1,6 +1,8 @@
 # webserv
 Create a HTTP server in C++98.
 
+![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+
 ## Installation
 
 To launch the website, run this command at the root of the repo:
